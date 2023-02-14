@@ -2,9 +2,9 @@ package automaton;
 
 public class Transition
 {
-    private final char currentState;
-    private final char nextState;
-    private final char transitionLabel;
+    private char currentState;
+    private char nextState;
+    private char transitionLabel;
 
     public Transition(char currentState, char nextState, char transitionLabel) {
         this.currentState = currentState;
@@ -13,19 +13,27 @@ public class Transition
     }
 
     public char getCurrentState() {
-        return currentState;
+        return this.currentState;
     }
-
     public char getNextState() {
-        return nextState;
+        return this.nextState;
+    }
+    public char getTransitionLabel() {
+        return this.transitionLabel;
     }
 
-    public char getTransitionLabel() {
-        return transitionLabel;
+    public void setCurrentState(char currentState) {
+        this.currentState = currentState;
+    }
+    public void setNextState(char nextState) {
+        this.nextState = nextState;
+    }
+    public void setTransitionLabele(char transitionLabel) {
+        this.transitionLabel = transitionLabel;
     }
 
     @Override
     public String toString() {
-        return Character.toString(this.currentState);
+        return Character.toString(this.nextState);
     }
 }

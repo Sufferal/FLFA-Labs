@@ -11,10 +11,14 @@ public class Production
     }
 
     public String getLeftSide() {
-        return leftSide;
+        return this.leftSide;
+    }
+    public String getRightSide() {
+        return this.rightSide;
     }
 
-    public String getRightSide() {
-        return rightSide;
+    @Override
+    public String toString() {
+        return this.leftSide + "->" + this.rightSide;
     }
 }

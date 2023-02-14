@@ -20,27 +20,27 @@ public class Grammar {
     }
 
     public char[] getNonTerminalVariables() {
-        return nonTerminalVariables;
+        return this.nonTerminalVariables;
     }
     public char[] getTerminalVariables() {
-        return terminalVariables;
+        return this.terminalVariables;
     }
     public Production[] getProductions() {
-        return productions;
+        return this.productions;
     }
     public char getStartingCharacter() {
-        return startingCharacter;
+        return this.startingCharacter;
     }
 
     public String generateWord() {
-        return generateWord(startingCharacter);
+        return generateWord(this.startingCharacter);
     }
 
     private String generateWord(char symbol) {
         StringBuilder result = new StringBuilder();
 
         ArrayList<Production> possibleProductions = new ArrayList<>();
-        for (Production production : productions) {
+        for (Production production : this.productions) {
             if (production.getLeftSide().charAt(0) == symbol) {
                 possibleProductions.add(production);
             }
@@ -63,7 +63,7 @@ public class Grammar {
     }
 
     private boolean isNonTerminal(char symbol) {
-        for (char nonTerminal : nonTerminalVariables) {
+        for (char nonTerminal : this.nonTerminalVariables) {
             if (nonTerminal == symbol) {
                 return true;
             }
@@ -72,38 +72,36 @@ public class Grammar {
     }
 
     public FiniteAutomaton toFiniteAutomaton() {
-        HashMap<Character, Integer> stateMap = new HashMap<>();
-        int stateIndex = 0;
-        for (char nonTerminal : nonTerminalVariables) {
-            stateMap.put(nonTerminal, stateIndex++);
-        }
-        for (char terminal : terminalVariables) {
-            stateMap.put(terminal, stateIndex++);
+        // Q - possible states
+        char[] possibleStates = this.nonTerminalVariables;
+        char[] newPossibleStates = new char[possibleStates.length + 1];
+        System.arraycopy(possibleStates, 0, newPossibleStates, 0, possibleStates.length);
+        newPossibleStates[newPossibleStates.length - 1] = 'X';
+        possibleStates = newPossibleStates;
+
+        // Σ - Alphabet
+        char[] alphabet = terminalVariables;
+
+        // Δ - Transitions
+        Transition[] transitions = new Transition[this.productions.length];
+        int i = 0;
+        for (Production production : this.productions) {
+            char currentState = production.getLeftSide().charAt(0);
+            char nextState = production.getRightSide().length() > 1
+                    ? production.getRightSide().charAt(1)
+                    : 'X';
+            char transitionLabel = production.getRightSide().charAt(0);
+
+            transitions[i] = new Transition(currentState, nextState, transitionLabel);
+            i++;
         }
 
-        int numStates = stateIndex;
-        char[] possibleStates = new char[numStates];
-        for (Map.Entry<Character, Integer> entry : stateMap.entrySet()) {
-            possibleStates[entry.getValue()] = entry.getKey();
-        }
-
-        Transition[] transitions = new Transition[numStates * numStates];
-        int transitionIndex = 0;
-        for (Production production : productions) {
-            char leftSide = production.getLeftSide().charAt(0);
-            for (int i = 0; i < production.getRightSide().length(); i++) {
-                char rightSideSymbol = production.getRightSide().charAt(i);
-                transitions[transitionIndex++] = new Transition(
-                        leftSide,
-                        rightSideSymbol,
-                        rightSideSymbol
-                );
-            }
-        }
-
+        // q0 - Initial state
         char initialState = startingCharacter;
-        char[] finalStates = new char[]{startingCharacter};
 
-        return new FiniteAutomaton(possibleStates, terminalVariables, transitions, initialState, finalStates);
+        // F - Final State
+        char[] finalStates = new char[]{'X'};
+
+        return new FiniteAutomaton(possibleStates, alphabet, transitions, initialState, finalStates);
     }
 }
