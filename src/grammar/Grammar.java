@@ -19,19 +19,6 @@ public class Grammar {
         this.startingCharacter = startingCharacter;
     }
 
-    public char[] getNonTerminalVariables() {
-        return this.nonTerminalVariables;
-    }
-    public char[] getTerminalVariables() {
-        return this.terminalVariables;
-    }
-    public Production[] getProductions() {
-        return this.productions;
-    }
-    public char getStartingCharacter() {
-        return this.startingCharacter;
-    }
-
     public String generateWord() {
         return generateWord(this.startingCharacter);
     }
@@ -103,5 +90,91 @@ public class Grammar {
         char[] finalStates = new char[]{'X'};
 
         return new FiniteAutomaton(possibleStates, alphabet, transitions, initialState, finalStates);
+    }
+
+
+    public  ChomskyType classifyGrammar() {
+        // Check if the grammar is regular
+        boolean isRegular = true;
+        for (Production p : productions) {
+            String rhs = p.getRightSide();
+            if (rhs.length() == 1 && Character.isLowerCase(rhs.charAt(0))) {
+                // Single terminal symbol
+                continue;
+            } else if (rhs.length() == 2) {
+                // Two symbols
+                char firstSymbol = rhs.charAt(0);
+                char secondSymbol = rhs.charAt(1);
+                if (Character.isUpperCase(firstSymbol) && Character.isLowerCase(secondSymbol)) {
+                    // Left-linear
+                    continue;
+                } else if (Character.isLowerCase(firstSymbol) && Character.isUpperCase(secondSymbol)) {
+                    // Right-linear
+                    continue;
+                }
+            }
+            // Not regular
+            isRegular = false;
+            break;
+        }
+        if (isRegular) {
+            return ChomskyType.TYPE_3;
+        }
+
+        // Check if the grammar is context-free
+        boolean isContextFree = true;
+        for (Production p : this.productions) {
+            if (p.getLeftSide().length() > 1 || !Character.isUpperCase(p.getLeftSide().charAt(0))) {
+                isContextFree = false;
+                break;
+            }
+        }
+        if (isContextFree) {
+            return ChomskyType.TYPE_2;
+        }
+
+        // Check if the grammar is context-sensitive
+        boolean isContextSensitive = true;
+        // Check that every production satisfies the Type 1 grammar conditions
+        // Check that every production satisfies the Type 1 grammar conditions
+        for (Production p : productions) {
+            String leftSide = p.getLeftSide();
+            String rightSide = p.getRightSide();
+
+            if (leftSide.length() > rightSide.length()) {
+                // The length of the right-hand side must be greater than or equal to the length of the left-hand side
+                isContextSensitive = false;
+                break;
+            }
+
+            if (rightSide.length() == 0 && !leftSide.equals(Character.toString(startingCharacter))) {
+                // If ε is produced, it can only be produced from the start symbol S
+                isContextSensitive = false;
+                break;
+            }
+
+            // All productions must be of the form Aα → βBγ, where A and B are non-terminal symbols, and α and γ are
+            // strings of non-terminal and/or terminal symbols (with α and γ not both ε)
+            if (leftSide.length() == 1 && isNonTerminal(leftSide.charAt(0))) {
+                // If the left side is a single non-terminal symbol
+                if (!isNonTerminal(rightSide.charAt(0))) {
+                    isContextSensitive = false;
+                    break;
+                }
+            } else {
+                // If the left side is a string of non-terminal and/or terminal symbols
+                if (rightSide.length() == 0 || !isNonTerminal(leftSide.charAt(leftSide.length() - 1)) || !isNonTerminal(rightSide.charAt(0))) {
+                    isContextSensitive = false;
+                    break;
+                }
+            }
+        }
+
+        if (isContextSensitive) {
+            return ChomskyType.TYPE_1;
+        }
+
+        // If we get here the grammar is unrestricted
+        return ChomskyType.TYPE_0;
     }
 }
