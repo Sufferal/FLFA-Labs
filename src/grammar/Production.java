@@ -19,6 +19,6 @@ public class Production
 
     @Override
     public String toString() {
-        return this.leftSide + "->" + this.rightSide;
+        return this.leftSide + " -> " + this.rightSide;
     }
 }

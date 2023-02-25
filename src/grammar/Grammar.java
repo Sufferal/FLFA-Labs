@@ -6,29 +6,33 @@ import automaton.Transition;
 import java.util.*;
 
 public class Grammar {
-    private final char[] nonTerminalVariables;
-    private final char[] terminalVariables;
+    private final String[] nonTerminalVariables;
+    private final String[] terminalVariables;
     private final Production[] productions;
-    private final char startingCharacter;
+    private final String startingCharacter;
 
-    public Grammar(char[] nonTerminalVariables, char[] terminalVariables,
-                   Production[] productions, char startingCharacter) {
+    public Grammar(String[] nonTerminalVariables, String[] terminalVariables,
+                   Production[] productions, String startingCharacter) {
         this.nonTerminalVariables = nonTerminalVariables;
         this.terminalVariables = terminalVariables;
         this.productions = productions;
         this.startingCharacter = startingCharacter;
     }
 
+    public Production[] getProductions() {
+        return this.productions;
+    }
+
     public String generateWord() {
         return generateWord(this.startingCharacter);
     }
 
-    private String generateWord(char symbol) {
+    private String generateWord(String symbol) {
         StringBuilder result = new StringBuilder();
 
         ArrayList<Production> possibleProductions = new ArrayList<>();
         for (Production production : this.productions) {
-            if (production.getLeftSide().charAt(0) == symbol) {
+            if (Objects.equals(production.getLeftSide(), symbol)) {
                 possibleProductions.add(production);
             }
         }
@@ -38,7 +42,7 @@ public class Grammar {
         String rightSide = possibleProductions.get(randomIndex).getRightSide();
 
         for (int i = 0; i < rightSide.length(); i++) {
-            char currentSymbol = rightSide.charAt(i);
+            String currentSymbol = String.valueOf(rightSide.charAt(i));
             if (isNonTerminal(currentSymbol)) {
                 result.append(generateWord(currentSymbol));
             } else {
@@ -49,9 +53,9 @@ public class Grammar {
         return result.toString();
     }
 
-    private boolean isNonTerminal(char symbol) {
-        for (char nonTerminal : this.nonTerminalVariables) {
-            if (nonTerminal == symbol) {
+    private boolean isNonTerminal(String symbol) {
+        for (String nonTerminal : this.nonTerminalVariables) {
+            if (Objects.equals(nonTerminal, symbol)) {
                 return true;
             }
         }
@@ -60,14 +64,14 @@ public class Grammar {
 
     public FiniteAutomaton toFiniteAutomaton() {
         // Q - possible states
-        char[] possibleStates = this.nonTerminalVariables;
-        char[] newPossibleStates = new char[possibleStates.length + 1];
+        String[] possibleStates = Arrays.toString(this.nonTerminalVariables).split("");
+        String[] newPossibleStates = new String[possibleStates.length + 1];
         System.arraycopy(possibleStates, 0, newPossibleStates, 0, possibleStates.length);
-        newPossibleStates[newPossibleStates.length - 1] = 'X';
+        newPossibleStates[newPossibleStates.length - 1] = "X";
         possibleStates = newPossibleStates;
 
         // Σ - Alphabet
-        char[] alphabet = terminalVariables;
+        String[] alphabet = terminalVariables;
 
         // Δ - Transitions
         Transition[] transitions = new Transition[this.productions.length];
@@ -79,23 +83,33 @@ public class Grammar {
                     : 'X';
             char transitionLabel = production.getRightSide().charAt(0);
 
-            transitions[i] = new Transition(currentState, nextState, transitionLabel);
+            transitions[i] = new Transition(Character.toString(currentState), transitionLabel, Character.toString(nextState));
             i++;
         }
 
         // q0 - Initial state
-        char initialState = startingCharacter;
+        String initialState = String.valueOf(startingCharacter);
 
         // F - Final State
-        char[] finalStates = new char[]{'X'};
+        String[] finalStates = new String[]{"X"};
 
         return new FiniteAutomaton(possibleStates, alphabet, transitions, initialState, finalStates);
     }
 
 
-    public  ChomskyType classifyGrammar() {
-        // Check if the grammar is regular
-        boolean isRegular = true;
+    public ChomskyType classifyGrammar() {
+        if (isRegularGrammar()) {
+            return ChomskyType.TYPE_3;
+        } else if (isContextFreeGrammar()) {
+            return ChomskyType.TYPE_2;
+        } else if (isContextSensitiveGrammar()) {
+            return ChomskyType.TYPE_1;
+        } else {
+            return ChomskyType.TYPE_0;
+        }
+    }
+
+    public boolean isRegularGrammar() {
         for (Production p : productions) {
             String rhs = p.getRightSide();
             if (rhs.length() == 1 && Character.isLowerCase(rhs.charAt(0))) {
@@ -113,29 +127,32 @@ public class Grammar {
                     continue;
                 }
             }
-            // Not regular
-            isRegular = false;
-            break;
-        }
-        if (isRegular) {
-            return ChomskyType.TYPE_3;
+            return false;
         }
 
-        // Check if the grammar is context-free
-        boolean isContextFree = true;
-        for (Production p : this.productions) {
-            if (p.getLeftSide().length() > 1 || !Character.isUpperCase(p.getLeftSide().charAt(0))) {
-                isContextFree = false;
-                break;
+        return true;
+    }
+
+    public boolean isContextFreeGrammar() {
+        // A grammar is context-free if every production rule has the form:
+        //   A → α (where A is a single non-terminal symbol and α is a string of terminals and/or non-terminals)
+        for (Production production : productions) {
+            String leftSide = production.getLeftSide();
+            String rightSide = production.getRightSide();
+            if (leftSide.length() != 1 || !Character.isUpperCase(leftSide.charAt(0))) {
+                return false; // Not a context-free grammar
+            }
+            for (int i = 0; i < rightSide.length(); i++) {
+                char symbol = rightSide.charAt(i);
+                if (!Character.isUpperCase(symbol) && !Character.isLowerCase(symbol)) {
+                    return false; // Not a context-free grammar
+                }
             }
         }
-        if (isContextFree) {
-            return ChomskyType.TYPE_2;
-        }
+        return true; // All production rules satisfy the context-free grammar condition
+    }
 
-        // Check if the grammar is context-sensitive
-        boolean isContextSensitive = true;
-        // Check that every production satisfies the Type 1 grammar conditions
+    public boolean isContextSensitiveGrammar() {
         // Check that every production satisfies the Type 1 grammar conditions
         for (Production p : productions) {
             String leftSide = p.getLeftSide();
@@ -143,38 +160,22 @@ public class Grammar {
 
             if (leftSide.length() > rightSide.length()) {
                 // The length of the right-hand side must be greater than or equal to the length of the left-hand side
-                isContextSensitive = false;
-                break;
-            }
-
-            if (rightSide.length() == 0 && !leftSide.equals(Character.toString(startingCharacter))) {
-                // If ε is produced, it can only be produced from the start symbol S
-                isContextSensitive = false;
-                break;
-            }
-
-            // All productions must be of the form Aα → βBγ, where A and B are non-terminal symbols, and α and γ are
-            // strings of non-terminal and/or terminal symbols (with α and γ not both ε)
-            if (leftSide.length() == 1 && isNonTerminal(leftSide.charAt(0))) {
-                // If the left side is a single non-terminal symbol
-                if (!isNonTerminal(rightSide.charAt(0))) {
-                    isContextSensitive = false;
-                    break;
-                }
-            } else {
-                // If the left side is a string of non-terminal and/or terminal symbols
-                if (rightSide.length() == 0 || !isNonTerminal(leftSide.charAt(leftSide.length() - 1)) || !isNonTerminal(rightSide.charAt(0))) {
-                    isContextSensitive = false;
-                    break;
-                }
+                return false;
             }
         }
 
-        if (isContextSensitive) {
-            return ChomskyType.TYPE_1;
-        }
+        // If we get here, the grammar satisfies the Type 1 conditions
+        return true;
+    }
 
-        // If we get here the grammar is unrestricted
-        return ChomskyType.TYPE_0;
+
+    @Override
+    public String toString() {
+        return "Grammar {" + "\n" +
+                "\tVn (Non-terminal) = " + Arrays.toString(this.nonTerminalVariables) + "\n" +
+                "\tVt (Terminal) = " + Arrays.toString(this.terminalVariables) + "\n" +
+                "\tP (Productions) = " + Arrays.toString(this.productions) + "\n" +
+                "\tS (Starting character) = " + this.startingCharacter + "\n" +
+                '}';
     }
 }

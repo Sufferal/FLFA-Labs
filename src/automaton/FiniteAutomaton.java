@@ -1,17 +1,20 @@
 package automaton;
 
+import grammar.Grammar;
+import grammar.Production;
+
 import java.util.*;
 import java.util.Arrays;
 
 public class FiniteAutomaton {
-    private final char[] states;
-    private final char[] alphabet;
+    private final String[] states;
+    private final String[] alphabet;
     private Transition[] transitions;
-    private final char initialState;
-    private final char[] finalStates;
+    private final String initialState;
+    private final String[] finalStates;
 
-    public FiniteAutomaton(char[] states, char[] alphabet,  Transition[] transitions,
-                           char initialState, char[] finalStates) {
+    public FiniteAutomaton(String[] states, String[] alphabet,  Transition[] transitions,
+                           String initialState, String[] finalStates) {
         this.states = states;
         this.alphabet = alphabet;
         this.transitions = transitions;
@@ -19,28 +22,15 @@ public class FiniteAutomaton {
         this.finalStates = finalStates;
     }
 
-    public char[] getStates() {
-        return this.states;
-    }
-    public char[] getAlphabet() {
-        return this.alphabet;
-    }
-    public char getInitialState() {
-        return this.initialState;
-    }
-    public char[] getFinalStates() {
-        return this.finalStates;
-    }
-
     public boolean isWordValid(String str) {
-        Set<Character> currentStates = epsilonClosure(this.initialState);
+        Set<String> currentStates = epsilonClosure(this.initialState);
 
         for (char c : str.toCharArray()) {
-            Set<Character> nextStates = new HashSet<>();
+            Set<String> nextStates = new HashSet<>();
 
-            for (char currentState : currentStates) {
+            for (String currentState : currentStates) {
                 for (Transition t : this.transitions) {
-                    if (t.getCurrentState() == currentState &&
+                    if (Objects.equals(t.getCurrentState(), currentState) &&
                         t.getTransitionLabel() == c) {
                         nextStates.addAll(epsilonClosure(t.getNextState()));
                     }
@@ -54,7 +44,7 @@ public class FiniteAutomaton {
             currentStates = nextStates;
         }
 
-        for (char finalState : this.finalStates) {
+        for (String finalState : this.finalStates) {
             if (currentStates.contains(finalState)) {
                 return true;
             }
@@ -63,18 +53,18 @@ public class FiniteAutomaton {
         return false;
     }
 
-    public Set<Character> epsilonClosure(char state) {
-        Set<Character> closure = new HashSet<>();
+    public Set<String> epsilonClosure(String state) {
+        Set<String> closure = new HashSet<>();
         closure.add(state);
 
-        Stack<Character> stack = new Stack<>();
+        Stack<String> stack = new Stack<>();
         stack.push(state);
 
         while (!stack.isEmpty()) {
-            char currentState = stack.pop();
+            String currentState = stack.pop();
             for (Transition t : transitions) {
-                if (t.getCurrentState() == currentState && t.getTransitionLabel() == 'e') {
-                    char nextState = t.getNextState();
+                if (Objects.equals(t.getCurrentState(), currentState) && t.getTransitionLabel() == 'e') {
+                    String nextState = t.getNextState();
                     if (!closure.contains(nextState)) {
                         closure.add(nextState);
                         stack.push(nextState);
@@ -86,6 +76,33 @@ public class FiniteAutomaton {
         return closure;
     }
 
+
+
+    public Grammar convertToRegularGrammar() {
+        String[] nonTerminalVariables = this.states;
+        String[] terminalVariables = this.alphabet;
+        String startingCharacter = this.initialState;
+
+        ArrayList<Production> productions = new ArrayList<>();
+
+        for (String state : this.states) {
+            for (Transition t : this.transitions) {
+                if (Objects.equals(t.getCurrentState(), state) && t.getTransitionLabel() != 'e') {
+                    String production = state + "->" + t.getTransitionLabel() + t.getNextState();
+                    productions.add(new Production(state, String.valueOf(t.getTransitionLabel()) + t.getNextState()));
+                }
+            }
+        }
+
+        for (String finalState : this.finalStates) {
+            productions.add(new Production(finalState, "ε"));
+        }
+
+        Production[] productionsArray = new Production[productions.size()];
+        productionsArray = productions.toArray(productionsArray);
+
+        return new Grammar(nonTerminalVariables, terminalVariables, productionsArray, startingCharacter);
+    }
 
     @Override
     public String toString() {
