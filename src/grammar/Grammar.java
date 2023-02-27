@@ -81,7 +81,7 @@ public class Grammar {
             char nextState = production.getRightSide().length() > 1
                     ? production.getRightSide().charAt(1)
                     : 'X';
-            char transitionLabel = production.getRightSide().charAt(0);
+            String transitionLabel = String.valueOf(production.getRightSide().charAt(0));
 
             transitions[i] = new Transition(Character.toString(currentState), transitionLabel, Character.toString(nextState));
             i++;

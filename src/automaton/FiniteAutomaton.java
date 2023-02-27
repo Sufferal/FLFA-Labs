@@ -5,6 +5,7 @@ import grammar.Production;
 
 import java.util.*;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class FiniteAutomaton {
     private final String[] states;
@@ -31,7 +32,7 @@ public class FiniteAutomaton {
             for (String currentState : currentStates) {
                 for (Transition t : this.transitions) {
                     if (Objects.equals(t.getCurrentState(), currentState) &&
-                        t.getTransitionLabel() == c) {
+                            Objects.equals(t.getTransitionLabel(), String.valueOf(c))) {
                         nextStates.addAll(epsilonClosure(t.getNextState()));
                     }
                 }
@@ -63,7 +64,8 @@ public class FiniteAutomaton {
         while (!stack.isEmpty()) {
             String currentState = stack.pop();
             for (Transition t : transitions) {
-                if (Objects.equals(t.getCurrentState(), currentState) && t.getTransitionLabel() == 'e') {
+                if (Objects.equals(t.getCurrentState(), currentState)
+                        && Objects.equals(t.getTransitionLabel(), "e")) {
                     String nextState = t.getNextState();
                     if (!closure.contains(nextState)) {
                         closure.add(nextState);
@@ -87,7 +89,7 @@ public class FiniteAutomaton {
 
         for (String state : this.states) {
             for (Transition t : this.transitions) {
-                if (Objects.equals(t.getCurrentState(), state) && t.getTransitionLabel() != 'e') {
+                if (Objects.equals(t.getCurrentState(), state) && !Objects.equals(t.getTransitionLabel(), "e")) {
                     String production = state + "->" + t.getTransitionLabel() + t.getNextState();
                     productions.add(new Production(state, String.valueOf(t.getTransitionLabel()) + t.getNextState()));
                 }
@@ -140,6 +142,67 @@ public class FiniteAutomaton {
         // If we haven't found any non-deterministic pairs, FA is deterministic
         return true;
     }
+
+    public FiniteAutomaton convertToDFA() {
+        Set<Set<String>> powerSet = getPowerSet(states);
+        Map<Set<String>, Map<String, Set<String>>> dfaTransitions = new HashMap<>();
+        Set<String> dfaFinalStates = new HashSet<>();
+        String dfaInitialState = "{" + initialState + "}";
+
+        // Compute DFA transitions and final states
+        for (Set<String> stateSet : powerSet) {
+            Map<String, Set<String>> transitions = new HashMap<>();
+            for (String symbol : alphabet) {
+                Set<String> nextStates = new HashSet<>();
+                for (String state : stateSet) {
+                    for (Transition transition : transitionsFrom(state, symbol)) {
+                        nextStates.add(transition.getNextState());
+                    }
+                }
+                if (!nextStates.isEmpty()) {
+                    transitions.put(symbol, nextStates);
+                }
+            }
+            dfaTransitions.put(stateSet, transitions);
+            if (Arrays.asList(finalStates).contains(stateSet.toString())) {
+                dfaFinalStates.add(stateSet.toString());
+            }
+        }
+
+        return new FiniteAutomaton(
+                powerSet.stream().map(Set::toString).toArray(String[]::new),
+                alphabet,
+                dfaTransitions.entrySet().stream()
+                        .flatMap(e -> e.getValue().entrySet().stream()
+                                .map(entry -> new Transition(e.getKey().toString(), entry.getKey(),
+                                        entry.getValue().toString())))
+                        .toArray(Transition[]::new),
+                dfaInitialState,
+                dfaFinalStates.toArray(String[]::new));
+    }
+
+    private Set<Set<String>> getPowerSet(String[] set) {
+        Set<Set<String>> powerSet = new HashSet<>();
+        int setSize = set.length;
+        long powSetSize = (long) Math.pow(2, setSize);
+        for (int counter = 0; counter < powSetSize; counter++) {
+            Set<String> subset = new HashSet<>();
+            for (int j = 0; j < setSize; j++) {
+                if ((counter & (1 << j)) != 0) {
+                    subset.add(set[j]);
+                }
+            }
+            powerSet.add(subset);
+        }
+        return powerSet;
+    }
+
+    private List<Transition> transitionsFrom(String state, String symbol) {
+        return Arrays.stream(transitions)
+                .filter(t -> t.getCurrentState().equals(state) && t.getTransitionLabel().equals(symbol))
+                .collect(Collectors.toList());
+    }
+
 
 
     @Override
