@@ -70,8 +70,24 @@ public class Main
         System.out.println("\n 1. Classify the grammar based on Chomsky hierarchy: ");
         System.out.println("===== Current grammar is of: " + grammar.classifyGrammar() + " =====");
 
-        System.out.println("\n 2. Convert the finite automaton regular grammar: ");
-        System.out.println("===== FA -> Grammar: \n" + FA.convertToRegularGrammar()+ " \n=====");
+        System.out.println("\n 2. Convert the finite automaton to regular grammar: ");
+        System.out.println(FA.convertToRegularGrammar());
+
+        System.out.println("\n 3. Check if Finite Automaton is deterministic: ");
+        System.out.println("===== FA is deterministic: " + FA.isDeterministic() + " =====");
+
+//        FiniteAutomaton DFA = new FiniteAutomaton(
+//                new String[]{"q0", "q1"},
+//                new String[]{"0", "1"},
+//                new Transition[]{
+//                        new Transition("q0", '0', "q0"),
+//                        new Transition("q0", '1', "q1"),
+//                        new Transition("q1", '0', "q1"),
+//                        new Transition("q1", '1', "q0"),
+//                },
+//                "q0",
+//                new String[]{"q1"}
+//        );
 
 //        System.out.println("\n 3. Generate words : ");
 //        for (int i = 0; i < 5; i++) {

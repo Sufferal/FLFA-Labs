@@ -104,6 +104,44 @@ public class FiniteAutomaton {
         return new Grammar(nonTerminalVariables, terminalVariables, productionsArray, startingCharacter);
     }
 
+    public boolean isDeterministic() {
+        // Create a map to keep track of transitions for each state and input symbol pair
+        Map<String, Map<String, Set<String>>> transitionMap = new HashMap<>();
+
+        // Iterate through all transitions
+        for (Transition t : transitions) {
+            // Get the source state and input symbol for this transition
+            String sourceState = t.getCurrentState();
+            String inputSymbol = String.valueOf(t.getTransitionLabel());
+
+            // If we haven't seen this state and input symbol pair before, create a new entry in the map
+            if (!transitionMap.containsKey(sourceState)) {
+                transitionMap.put(sourceState, new HashMap<>());
+            }
+            if (!transitionMap.get(sourceState).containsKey(inputSymbol)) {
+                transitionMap.get(sourceState).put(inputSymbol, new HashSet<>());
+            }
+
+            // Add the destination state to the set of possible transitions for this pair
+            transitionMap.get(sourceState).get(inputSymbol).add(t.getNextState());
+        }
+
+        // Check if there is more than one possible transition for any state and input symbol pair
+        for (String state : states) {
+            for (String symbol : alphabet) {
+                if (transitionMap.containsKey(state) && transitionMap.get(state).containsKey(symbol)
+                        && transitionMap.get(state).get(symbol).size() > 1) {
+                    // If there is more than one possible transition, FA is non-deterministic
+                    return false;
+                }
+            }
+        }
+
+        // If we haven't found any non-deterministic pairs, FA is deterministic
+        return true;
+    }
+
+
     @Override
     public String toString() {
         return "FiniteAutomaton{" + "\n" +
