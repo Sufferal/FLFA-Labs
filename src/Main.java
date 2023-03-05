@@ -3,7 +3,10 @@ import automaton.Transition;
 import grammar.Grammar;
 import grammar.Production;
 
-import java.util.Arrays;
+import java.io.*;
+
+import static guru.nidi.graphviz.model.Graph.*;
+
 
 //    Variant 6: First laboratory work
 //        Vn={S, I, J, K},
@@ -33,8 +36,7 @@ import java.util.Arrays;
 
 public class Main
 {
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) throws IOException {
         Grammar grammar = new Grammar(
                 new String[]{"S", "I", "J", "K"},
                 new String[]{"a", "b", "c", "e", "n", "f", "m"},
@@ -78,5 +80,8 @@ public class Main
 
         System.out.println("\n 4. NFA to DFA: ");
         System.out.println("===== DFA: " + FA.convertToDFA() + " =====");
+
+        System.out.println("\n 5. Display Finite Automaton graph: ");
+        FA.showGraph();
     }
 }

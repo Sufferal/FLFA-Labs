@@ -3,8 +3,14 @@ package automaton;
 import grammar.Grammar;
 import grammar.Production;
 
+import java.awt.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class FiniteAutomaton {
@@ -201,6 +207,67 @@ public class FiniteAutomaton {
         return Arrays.stream(transitions)
                 .filter(t -> t.getCurrentState().equals(state) && t.getTransitionLabel().equals(symbol))
                 .collect(Collectors.toList());
+    }
+
+    public String toDot() {
+        StringBuilder dot = new StringBuilder();
+        dot.append("digraph finite_automaton {\n");
+        dot.append("\trankdir=LR;\n");
+        dot.append("\tsize=\"8,5\"\n");
+
+        // add the states
+        dot.append("\tnode [shape = circle];\n");
+        for (String state : states) {
+            dot.append("\t").append(state);
+            if (finalStates != null && Arrays.asList(finalStates).contains(state)) {
+                dot.append(" [shape=doublecircle]");
+            }
+            dot.append(";\n");
+        }
+
+        // add the transitions
+        for (Transition transition : transitions) {
+            dot.append("\t").append(transition.getCurrentState()).append(" -> ")
+                    .append(transition.getNextState()).append(" [label=\"")
+                    .append(transition.getTransitionLabel()).append("\"];\n");
+        }
+
+        // add the initial state
+        dot.append("\tnode [shape = point]; qi\n");
+        dot.append("\tnode [shape = circle]; ").append(initialState).append("\n");
+        dot.append("\tedge [dir=none]; qi -> ").append(initialState).append("\n");
+
+        dot.append("}\n");
+
+        return dot.toString();
+    }
+
+
+    public void showGraph() {
+        try {
+            // generate the dot file
+            String dot = this.toDot();
+
+            // create a temporary file for the dot input
+            File dotFile = File.createTempFile("finite_automaton", ".dot");
+            BufferedWriter bw = new BufferedWriter(new FileWriter(dotFile));
+            bw.write(dot);
+            bw.close();
+
+            // create a temporary file for the image output
+            File imgFile = File.createTempFile("finite_automaton", ".png");
+
+            // run the Graphviz command to generate the image
+            ProcessBuilder pb = new ProcessBuilder("dot", "-Tpng", "-o", imgFile.getAbsolutePath(),
+                    dotFile.getAbsolutePath());
+            pb.redirectErrorStream(true);
+            pb.start().waitFor();
+
+            // open the image in the default image viewer
+            Desktop.getDesktop().open(imgFile);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 

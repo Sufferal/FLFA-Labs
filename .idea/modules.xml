@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/FLFA-Labs-Examples.iml" filepath="$PROJECT_DIR$/FLFA-Labs-Examples.iml" />
+      <module fileurl="file://$PROJECT_DIR$/FLFA-Labs.iml" filepath="$PROJECT_DIR$/FLFA-Labs.iml" />
     </modules>
   </component>
 </project>
