@@ -3,11 +3,6 @@ import automaton.Transition;
 import grammar.Grammar;
 import grammar.Production;
 
-import java.io.*;
-
-import static guru.nidi.graphviz.model.Graph.*;
-
-
 //    Variant 6: First laboratory work
 //        Vn={S, I, J, K},
 //        Vt={a, b, c, e, n, f, m},
@@ -36,7 +31,7 @@ import static guru.nidi.graphviz.model.Graph.*;
 
 public class Main
 {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         Grammar grammar = new Grammar(
                 new String[]{"S", "I", "J", "K"},
                 new String[]{"a", "b", "c", "e", "n", "f", "m"},
@@ -73,7 +68,13 @@ public class Main
         System.out.println("===== Current grammar is of: " + grammar.classifyGrammar() + " =====");
 
         System.out.println("\n 2. Convert the finite automaton to regular grammar: ");
-        System.out.println(FA.convertToRegularGrammar());
+        Grammar FAtoGrammar = FA.convertToRegularGrammar();
+        System.out.println(FAtoGrammar);
+
+        System.out.println("\n 2.1. Generate random words from converted grammar: ");
+        for (int i = 0; i < 10; i++) {
+            System.out.println(FAtoGrammar.generateWord());
+        }
 
         System.out.println("\n 3. Check if Finite Automaton is deterministic: ");
         System.out.println("===== FA is deterministic: " + FA.isDeterministic() + " =====");

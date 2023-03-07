@@ -153,7 +153,7 @@ public class FiniteAutomaton {
         Set<Set<String>> powerSet = getPowerSet(states);
         Map<Set<String>, Map<String, Set<String>>> dfaTransitions = new HashMap<>();
         Set<String> dfaFinalStates = new HashSet<>();
-        String dfaInitialState = "{" + initialState + "}";
+        String dfaInitialState = initialState;
 
         // Compute DFA transitions and final states
         for (Set<String> stateSet : powerSet) {
@@ -170,7 +170,7 @@ public class FiniteAutomaton {
                 }
             }
             dfaTransitions.put(stateSet, transitions);
-            if (Arrays.asList(finalStates).contains(stateSet.toString())) {
+            if (stateSet.containsAll(Arrays.asList(finalStates))) {
                 dfaFinalStates.add(stateSet.toString());
             }
         }
@@ -241,7 +241,6 @@ public class FiniteAutomaton {
 
         return dot.toString();
     }
-
 
     public void showGraph() {
         try {

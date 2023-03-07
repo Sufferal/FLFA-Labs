@@ -19,10 +19,6 @@ public class Grammar {
         this.startingCharacter = startingCharacter;
     }
 
-    public Production[] getProductions() {
-        return this.productions;
-    }
-
     public String generateWord() {
         return generateWord(this.startingCharacter);
     }
@@ -40,18 +36,49 @@ public class Grammar {
         Random random = new Random();
         int randomIndex = random.nextInt(possibleProductions.size());
         String rightSide = possibleProductions.get(randomIndex).getRightSide();
+        int nonTerminalLength = this.nonTerminalVariables[0].length();
 
-        for (int i = 0; i < rightSide.length(); i++) {
-            String currentSymbol = String.valueOf(rightSide.charAt(i));
+        for (int i = 0; i <= rightSide.length() - nonTerminalLength; i++) {
+            String currentSymbol = rightSide.substring(i, i + nonTerminalLength);
             if (isNonTerminal(currentSymbol)) {
                 result.append(generateWord(currentSymbol));
             } else {
-                result.append(currentSymbol);
+                result.append(currentSymbol.charAt(0));
             }
         }
 
         return result.toString();
     }
+
+//    public String generateWord() {
+//        return generateWord(this.startingCharacter);
+//    }
+
+//    private String generateWord(String symbol) {
+//        StringBuilder result = new StringBuilder();
+//
+//        ArrayList<Production> possibleProductions = new ArrayList<>();
+//        for (Production production : this.productions) {
+//            if (Objects.equals(production.getLeftSide(), symbol)) {
+//                possibleProductions.add(production);
+//            }
+//        }
+//
+//        Random random = new Random();
+//        int randomIndex = random.nextInt(possibleProductions.size());
+//        String rightSide = possibleProductions.get(randomIndex).getRightSide();
+//
+//        for (int i = 0; i < rightSide.length(); i++) {
+//            String currentSymbol = String.valueOf(rightSide.charAt(i));
+//            if (isNonTerminal(currentSymbol)) {
+//                result.append(generateWord(currentSymbol));
+//            } else {
+//                result.append(currentSymbol);
+//            }
+//        }
+//
+//        return result.toString();
+//    }
 
     private boolean isNonTerminal(String symbol) {
         for (String nonTerminal : this.nonTerminalVariables) {
