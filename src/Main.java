@@ -65,10 +65,12 @@ public class Main
         );
 
         System.out.println("\n 1. Classify the grammar based on Chomsky hierarchy: ");
+        System.out.println(grammar);
         System.out.println("===== Current grammar is of: " + grammar.classifyGrammar() + " =====");
 
         System.out.println("\n 2. Convert the finite automaton to regular grammar: ");
         Grammar FAtoGrammar = FA.convertToRegularGrammar();
+        System.out.println(FA);
         System.out.println(FAtoGrammar);
 
         System.out.println("\n 2.1. Generate random words from converted grammar: ");
@@ -83,6 +85,7 @@ public class Main
         System.out.println("===== DFA: " + FA.convertToDFA() + " =====");
 
         System.out.println("\n 5. Display Finite Automaton graph: ");
+        System.out.println(FA);
         FA.showGraph();
     }
 }

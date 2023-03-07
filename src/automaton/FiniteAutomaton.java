@@ -95,7 +95,7 @@ public class FiniteAutomaton {
 
         for (String state : this.states) {
             for (Transition t : this.transitions) {
-                if (Objects.equals(t.getCurrentState(), state) && !Objects.equals(t.getTransitionLabel(), "e")) {
+                if (Objects.equals(t.getCurrentState(), state) && !Objects.equals(t.getTransitionLabel(), "ε")) {
                     String production = state + "->" + t.getTransitionLabel() + t.getNextState();
                     productions.add(new Production(state, String.valueOf(t.getTransitionLabel()) + t.getNextState()));
                 }

@@ -50,36 +50,6 @@ public class Grammar {
         return result.toString();
     }
 
-//    public String generateWord() {
-//        return generateWord(this.startingCharacter);
-//    }
-
-//    private String generateWord(String symbol) {
-//        StringBuilder result = new StringBuilder();
-//
-//        ArrayList<Production> possibleProductions = new ArrayList<>();
-//        for (Production production : this.productions) {
-//            if (Objects.equals(production.getLeftSide(), symbol)) {
-//                possibleProductions.add(production);
-//            }
-//        }
-//
-//        Random random = new Random();
-//        int randomIndex = random.nextInt(possibleProductions.size());
-//        String rightSide = possibleProductions.get(randomIndex).getRightSide();
-//
-//        for (int i = 0; i < rightSide.length(); i++) {
-//            String currentSymbol = String.valueOf(rightSide.charAt(i));
-//            if (isNonTerminal(currentSymbol)) {
-//                result.append(generateWord(currentSymbol));
-//            } else {
-//                result.append(currentSymbol);
-//            }
-//        }
-//
-//        return result.toString();
-//    }
-
     private boolean isNonTerminal(String symbol) {
         for (String nonTerminal : this.nonTerminalVariables) {
             if (Objects.equals(nonTerminal, symbol)) {
@@ -202,7 +172,7 @@ public class Grammar {
                 "\tVn (Non-terminal) = " + Arrays.toString(this.nonTerminalVariables) + "\n" +
                 "\tVt (Terminal) = " + Arrays.toString(this.terminalVariables) + "\n" +
                 "\tP (Productions) = " + Arrays.toString(this.productions) + "\n" +
-                "\tS (Starting character) = " + this.startingCharacter + "\n" +
+                "\tS (Starting symbol) = " + this.startingCharacter + "\n" +
                 '}';
     }
 }
