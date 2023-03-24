@@ -1,0 +1,24 @@
+package lexer;
+
+public enum TokenType {
+  // Keywords
+  IF, ELSE, WHILE, FOR, RETURN,
+
+  // Identifiers
+  IDENTIFIER,
+
+  // Types
+  BOOLEAN, INT, CHAR, STRING, FLOAT, DOUBLE, VOID,
+
+  // Operators
+  PLUS, MINUS, MULTIPLY, DIVIDE, MODULO,
+  ASSIGNMENT, EQUALS, NOT_EQUALS, LESS_THAN, LESS_THAN_OR_EQUAL_TO,
+  GREATER_THAN, GREATER_THAN_OR_EQUAL_TO, AND, OR, NOT,
+
+  // Punctuation
+  LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE, SEMICOLON, COMMA,
+
+  // End of input
+  END_OF_INPUT
+}
+

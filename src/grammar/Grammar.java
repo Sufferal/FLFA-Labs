@@ -2,6 +2,7 @@ package grammar;
 
 import automaton.FiniteAutomaton;
 import automaton.Transition;
+import lexer.TokenType;
 
 import java.util.*;
 
@@ -164,6 +165,46 @@ public class Grammar {
         // If we get here, the grammar satisfies the Type 1 conditions
         return true;
     }
+
+    public TokenType getTokenType(String input) {
+        return switch (input) {
+            case "if" -> TokenType.IF;
+            case "else" -> TokenType.ELSE;
+            case "for" -> TokenType.FOR;
+            case "while" -> TokenType.WHILE;
+            case "+" -> TokenType.PLUS;
+            case "-" -> TokenType.MINUS;
+            case "*" -> TokenType.MULTIPLY;
+            case "/" -> TokenType.DIVIDE;
+            case "%" -> TokenType.MODULO;
+            case "(" -> TokenType.LEFT_PAREN;
+            case ")" -> TokenType.RIGHT_PAREN;
+            case "{" -> TokenType.LEFT_BRACE;
+            case "}" -> TokenType.RIGHT_BRACE;
+            case "," -> TokenType.COMMA;
+            case ";" -> TokenType.SEMICOLON;
+            case "&&" -> TokenType.AND;
+            case "||" -> TokenType.OR;
+            case "!" -> TokenType.NOT;
+            case "=" -> TokenType.ASSIGNMENT;
+            case "==" -> TokenType.EQUALS;
+            case "!=" -> TokenType.NOT_EQUALS;
+            case ">" -> TokenType.GREATER_THAN;
+            case ">=" -> TokenType.GREATER_THAN_OR_EQUAL_TO;
+            case "<" -> TokenType.LESS_THAN;
+            case "<=" -> TokenType.LESS_THAN_OR_EQUAL_TO;
+            case "true", "false" -> TokenType.BOOLEAN;
+            case "int" -> TokenType.INT;
+            case "float" -> TokenType.FLOAT;
+            case "double" -> TokenType.DOUBLE;
+            case "String" -> TokenType.STRING;
+            case "char" -> TokenType.CHAR;
+            case "void" -> TokenType.VOID;
+            case "return" -> TokenType.RETURN;
+            default -> TokenType.IDENTIFIER;
+        };
+    }
+
 
 
     @Override
