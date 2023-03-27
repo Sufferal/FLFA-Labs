@@ -7,11 +7,9 @@ import java.util.regex.Pattern;
 
 public class Lexer {
   private final String input;
-  private int position;
 
   public Lexer(String input) {
     this.input = input;
-    this.position = 0;
   }
 
   public List<Token> tokenize() {
