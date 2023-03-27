@@ -1,11 +1,11 @@
 package lexer;
 
 public enum TokenType {
+  // Commands
+  PRINT, PRINTLN,
+
   // Keywords
   IF, ELSE, WHILE, FOR, RETURN,
-
-  // Identifiers
-  IDENTIFIER,
 
   // Types
   BOOLEAN, INT, CHAR, STRING, FLOAT, DOUBLE, VOID,
@@ -17,6 +17,9 @@ public enum TokenType {
 
   // Punctuation
   LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE, SEMICOLON, COMMA, WHITESPACE,
+
+  // Identifiers
+  IDENTIFIER,
 
   // End of input
   END_OF_INPUT
