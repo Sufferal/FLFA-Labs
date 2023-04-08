@@ -166,18 +166,20 @@ public class Grammar {
     }
 
     public void convertToChomskyNormalForm() {
-        System.out.println("===== Initial grammar =====");
+        System.out.println("\n===== Initial grammar =====");
         System.out.println(this);
         removeEpsilonProductions();
-        System.out.println("===== Removed epsilon productions =====");
+        System.out.println("\n===== Removed epsilon productions =====");
         System.out.println(this);
         removeUnitProductions();
-        System.out.println("===== Removed unit productions =====");
+        System.out.println("\n===== Removed unit productions =====");
         System.out.println(this);
         removeNonproductiveSymbols();
-        System.out.println("===== Removed nonproductive symbols =====");
+        System.out.println("\n===== Removed nonproductive symbols =====");
         System.out.println(this);
         removeInaccessibleSymbols();
+        System.out.println("\n===== Removed inaccessible symbols =====");
+        System.out.println(this);
     }
 
     private void removeEpsilonProductions() {
@@ -288,7 +290,6 @@ public class Grammar {
             // Check if all non-terminals on the right side are already productive
             for (int i = 0; i < rightSide.length(); i++) {
                 char symbol = rightSide.charAt(i);
-                System.out.println(symbol + " " + productiveSymbols.get(String.valueOf(symbol)));
                 if (Character.isUpperCase(symbol) && !productiveSymbols.get(String.valueOf(symbol))) {
                     isProductive = false;
                     break;
@@ -312,9 +313,64 @@ public class Grammar {
         newProductions.toArray(productions);
     }
 
-    private void removeInaccessibleSymbols() {
-        // TODO
+    public void removeInaccessibleSymbols() {
+        // Step 1: Find all reachable symbols
+        Set<String> reachableSymbols = new HashSet<>();
+        Deque<String> stack = new ArrayDeque<>();
+
+        // Start with the starting symbol
+        stack.push(this.startingCharacter);
+
+        while (!stack.isEmpty()) {
+            String symbol = stack.pop();
+            // Add the symbol to the set of reachable symbols if it hasn't been added already
+            if (!reachableSymbols.contains(symbol)) {
+                reachableSymbols.add(symbol);
+                // Add all symbols on the right-hand side of each production for this symbol to the stack
+                List<Production> productionsList = getProductionsForSymbol(symbol);
+                for (Production production : productionsList) {
+                    for (char c : production.getRightSide().toCharArray()) {
+                        if (Character.isUpperCase(c)) {
+                            stack.push(String.valueOf(c));
+                        }
+                    }
+                }
+            }
+        }
+
+        // Step 2: Remove all productions that contain unreachable symbols
+        List<Production> newProductionsList = new ArrayList<>();
+        for (Production production : this.productions) {
+            // Add the production to the new list if its left-hand side symbol is reachable
+            if (reachableSymbols.contains(production.getLeftSide())) {
+                String rightSide = production.getRightSide();
+                StringBuilder newRightSide = new StringBuilder();
+                // Construct the new right-hand side by removing all unreachable symbols
+                for (char c : rightSide.toCharArray()) {
+                    if (reachableSymbols.contains(String.valueOf(c)) || Arrays.asList(this.terminalVariables).contains(String.valueOf(c))) {
+                        newRightSide.append(c);
+                    }
+                }
+                // Add the new production to the new list
+                newProductionsList.add(new Production(production.getLeftSide(), newRightSide.toString()));
+            }
+        }
+
+        // Update the list of productions in the Grammar object
+        this.productions = newProductionsList.toArray(new Production[0]);
     }
+
+    // Returns a list of all productions in the grammar that have the given symbol on the left-hand side.
+    private List<Production> getProductionsForSymbol(String symbol) {
+        List<Production> productionsList = new ArrayList<>();
+        for (Production production : this.productions) {
+            if (production.getLeftSide().equals(symbol)) {
+                productionsList.add(production);
+            }
+        }
+        return productionsList;
+    }
+
 
     @Override
     public String toString() {
