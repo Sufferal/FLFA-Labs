@@ -173,6 +173,7 @@ public class Grammar {
     }
 
     private void removeEpsilonProductions() {
+        // For now this works only for grammars with one nullable non-terminal
         String nullableNonTerminal = "";
         for (Production production : productions) {
             if (production.getRightSide().equals("ε")) {
@@ -180,10 +181,13 @@ public class Grammar {
             }
         }
 
+        // If there are no nullable non-terminals, we don't need to do anything
         if (nullableNonTerminal.equals("")) {
             System.out.println("No nullable non-terminals");
+            return;
         }
 
+        // Replace all nullable non-terminals with ε
         List<Production> newProductions = new ArrayList<>();
         for (Production production : productions) {
             if (production.getRightSide().equals("ε")) {
@@ -205,8 +209,53 @@ public class Grammar {
     }
 
     private void removeUnitProductions() {
-        // TODO
+        // Find all unit productions
+        List<Production> unitProductions = new ArrayList<>();
+        for (Production production : productions) {
+            if (production.isUnitProduction()) {
+                unitProductions.add(production);
+            }
+        }
+
+        List<Production> newProductions = new ArrayList<>();
+        // My variant: S -> A, A -> B
+        for (Production unitProduction : unitProductions) {
+            for (Production production : productions) {
+                // When A -> Y, where Y is any symbol
+                // Add to new productions: S -> Y
+                if (production.getLeftSide().equals(unitProduction.getRightSide())) {
+                    // If Y is a terminal symbol
+                    // i.e. A -> Y -> x
+                    if (production.isUnitProduction()) {
+                        for (Production p : productions) {
+                            if (p.getLeftSide().equals(production.getRightSide())) {
+                                newProductions.add(new Production(unitProduction.getLeftSide(), p.getRightSide()));
+                            }
+                        }
+
+                        continue;
+                    }
+
+                    newProductions.add(new Production(unitProduction.getLeftSide(), production.getRightSide()));
+                    continue;
+                }
+
+                // Skip unit productions
+                if (production.isUnitProduction()) {
+                    continue;
+                }
+
+                // Doesn't allow duplicates
+                if(!newProductions.contains(production)) {
+                    newProductions.add(production);
+                }
+            }
+        }
+
+        productions = new Production[newProductions.size()];
+        newProductions.toArray(productions);
     }
+
 
     private void removeNonproductiveSymbols() {
         // TODO

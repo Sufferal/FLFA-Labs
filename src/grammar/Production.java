@@ -17,6 +17,12 @@ public class Production
         return this.rightSide;
     }
 
+    public boolean isUnitProduction() {
+        return this.rightSide.length() == 1 && this.leftSide.length() == 1
+                && this.rightSide.matches("[A-Z]")
+                && this.leftSide.matches("[A-Z]");
+    }
+
     @Override
     public String toString() {
         return this.leftSide + " -> " + this.rightSide;
