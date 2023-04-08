@@ -2,14 +2,13 @@ package grammar;
 
 import automaton.FiniteAutomaton;
 import automaton.Transition;
-import lexer.TokenType;
 
 import java.util.*;
 
 public class Grammar {
     private final String[] nonTerminalVariables;
     private final String[] terminalVariables;
-    private final Production[] productions;
+    private       Production[] productions;
     private final String startingCharacter;
 
     public Grammar(String[] nonTerminalVariables, String[] terminalVariables,
@@ -166,6 +165,56 @@ public class Grammar {
         return true;
     }
 
+    public void convertToChomskyNormalForm() {
+        removeEpsilonProductions();
+        removeUnitProductions();
+        removeNonproductiveSymbols();
+        removeInaccessibleSymbols();
+    }
+
+    private void removeEpsilonProductions() {
+        String nullableNonTerminal = "";
+        for (Production production : productions) {
+            if (production.getRightSide().equals("ε")) {
+                nullableNonTerminal = production.getLeftSide();
+            }
+        }
+
+        if (nullableNonTerminal.equals("")) {
+            System.out.println("No nullable non-terminals");
+        }
+
+        List<Production> newProductions = new ArrayList<>();
+        for (Production production : productions) {
+            if (production.getRightSide().equals("ε")) {
+                continue;
+            }
+
+            if (production.getRightSide().contains(nullableNonTerminal)) {
+                String newRightSide = production.getRightSide().replace(nullableNonTerminal, "");
+                newProductions.add(production);
+                newProductions.add(new Production(production.getLeftSide(), newRightSide));
+                continue;
+            }
+
+            newProductions.add(production);
+        }
+
+        this.productions = new Production[newProductions.size()];
+        newProductions.toArray(productions);
+    }
+
+    private void removeUnitProductions() {
+        // TODO
+    }
+
+    private void removeNonproductiveSymbols() {
+        // TODO
+    }
+
+    private void removeInaccessibleSymbols() {
+        // TODO
+    }
 
     @Override
     public String toString() {

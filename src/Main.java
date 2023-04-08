@@ -1,31 +1,47 @@
-import lexer.Lexer;
+// Variant 6
+// Vn = {S, A, B, C, E}
+// Vt = {a, b}
+// P = {
+//    S -> aB
+//    S -> AC
+//    A -> a
+//    A -> ASC
+//    A -> BC
+//    B -> b
+//    B -> bS
+//    C -> ε
+//    C -> BA
+//    E -> bB
+// }
+
+import grammar.Grammar;
+import grammar.Production;
 
 public class Main
 {
     public static void main(String[] args) {
-        String input_1 = "5+(6-2)*3/4";
-        Lexer lexer = new Lexer(input_1);
-        System.out.println("===== 1. For input: " + input_1 + " the tokens are: =====");
-        lexer.printTokens();
+        Grammar grammar = new Grammar(
+            new String[] {"S", "A", "B", "C", "E"},
+            new String[] {"a", "b"},
+            new Production[] {
+                new Production("S", "aB"),
+                new Production("S", "AC"),
+                new Production("A", "a"),
+                new Production("A", "ASC"),
+                new Production("A", "BC"),
+                new Production("B", "b"),
+                new Production("B", "bS"),
+                new Production("C", "ε"),
+                new Production("C", "BA"),
+                new Production("E", "bB")
+            },
+            "S"
+        );
 
-        String input_2 = "if (a == b) { return true; }";
-        lexer = new Lexer(input_2);
-        System.out.println("\n\n===== 2. For input: " + input_2 + " the tokens are: =====");
-        lexer.printTokens();
-
-        String input_3 = "for (int i = 0; i < 10; i++) { print(i); }";
-        lexer = new Lexer(input_3);
-        System.out.println("\n\n===== 3. For input: " + input_3 + " the tokens are: =====");
-        lexer.printTokens();
-
-        String input_4 = "while (i < 10) { println(i); i++; }";
-        lexer = new Lexer(input_4);
-        System.out.println("\n\n===== 4. For input: " + input_4 + " the tokens are: =====");
-        lexer.printTokens();
-
-        String input_5 = "char c = 'a';";
-        lexer = new Lexer(input_5);
-        System.out.println("\n\n===== 5. For input: " + input_5 + " the tokens are: =====");
-        lexer.printTokens();
+        System.out.println("===== For Variant 6 grammar: =====");
+        System.out.println(grammar);
+        System.out.println("===== The Chomsky Normal is: =====");
+        grammar.convertToChomskyNormalForm();
+        System.out.println(grammar);
     }
 }
