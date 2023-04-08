@@ -166,9 +166,17 @@ public class Grammar {
     }
 
     public void convertToChomskyNormalForm() {
+        System.out.println("===== Initial grammar =====");
+        System.out.println(this);
         removeEpsilonProductions();
+        System.out.println("===== Removed epsilon productions =====");
+        System.out.println(this);
         removeUnitProductions();
+        System.out.println("===== Removed unit productions =====");
+        System.out.println(this);
         removeNonproductiveSymbols();
+        System.out.println("===== Removed nonproductive symbols =====");
+        System.out.println(this);
         removeInaccessibleSymbols();
     }
 
@@ -258,7 +266,50 @@ public class Grammar {
 
 
     private void removeNonproductiveSymbols() {
-        // TODO
+        // Initialize all non-terminal variables as non-productive
+        Map<String, Boolean> productiveSymbols = new HashMap<>();
+        for (String nonTerminal : nonTerminalVariables) {
+            productiveSymbols.put(nonTerminal, false);
+        }
+
+        // Find all productive symbols
+        for (Production production : productions) {
+            if (production.getRightSide().length() == 1
+                    && Character.isLowerCase(production.getRightSide().charAt(0))) {
+                productiveSymbols.put(production.getLeftSide(), true);
+            }
+        }
+
+        // Find all symbols that can be derived from productive symbols
+        for (Production production : productions) {
+            String rightSide = production.getRightSide();
+            boolean isProductive = true;
+
+            // Check if all non-terminals on the right side are already productive
+            for (int i = 0; i < rightSide.length(); i++) {
+                char symbol = rightSide.charAt(i);
+                System.out.println(symbol + " " + productiveSymbols.get(String.valueOf(symbol)));
+                if (Character.isUpperCase(symbol) && !productiveSymbols.get(String.valueOf(symbol))) {
+                    isProductive = false;
+                    break;
+                }
+            }
+
+            // If all symbols on the right side are productive, then the left side is also productive
+            if (isProductive) {
+                productiveSymbols.put(production.getLeftSide(), true);
+            }
+        }
+
+        // Update production rules
+        List<Production> newProductions = new ArrayList<>();
+        for (Production production : productions) {
+            if(productiveSymbols.get(production.getLeftSide())) {
+                newProductions.add(production);
+            }
+        }
+        productions = new Production[newProductions.size()];
+        newProductions.toArray(productions);
     }
 
     private void removeInaccessibleSymbols() {

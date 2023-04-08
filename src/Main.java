@@ -38,10 +38,6 @@ public class Main
             "S"
         );
 
-        System.out.println("===== For Variant 6 grammar: =====");
-        System.out.println(grammar);
-        System.out.println("===== The Chomsky Normal is: =====");
         grammar.convertToChomskyNormalForm();
-        System.out.println(grammar);
     }
 }
