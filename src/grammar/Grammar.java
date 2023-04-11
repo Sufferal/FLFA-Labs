@@ -6,7 +6,7 @@ import automaton.Transition;
 import java.util.*;
 
 public class Grammar {
-    private final String[] nonTerminalVariables;
+    private String[] nonTerminalVariables;
     private final String[] terminalVariables;
     private       Production[] productions;
     private final String startingCharacter;
@@ -168,17 +168,20 @@ public class Grammar {
     public void convertToChomskyNormalForm() {
         System.out.println("\n===== Initial grammar =====");
         System.out.println(this);
-        removeEpsilonProductions();
+        this.removeEpsilonProductions();
         System.out.println("\n===== Removed epsilon productions =====");
         System.out.println(this);
-        removeUnitProductions();
+        this.removeUnitProductions();
         System.out.println("\n===== Removed unit productions =====");
         System.out.println(this);
-        removeNonproductiveSymbols();
+        this.removeNonproductiveSymbols();
         System.out.println("\n===== Removed nonproductive symbols =====");
         System.out.println(this);
-        removeInaccessibleSymbols();
+        this.removeInaccessibleSymbols();
         System.out.println("\n===== Removed inaccessible symbols =====");
+        System.out.println(this);
+        this.toChomskyNormalFormStep();
+        System.out.println("\n===== Chomsky Normal Form =====");
         System.out.println(this);
     }
 
@@ -358,6 +361,7 @@ public class Grammar {
 
         // Update the list of productions in the Grammar object
         this.productions = newProductionsList.toArray(new Production[0]);
+        this.nonTerminalVariables = reachableSymbols.toArray(new String[0]);
     }
 
     // Returns a list of all productions in the grammar that have the given symbol on the left-hand side.
@@ -370,6 +374,77 @@ public class Grammar {
         }
         return productionsList;
     }
+
+    public void toChomskyNormalFormStep() {
+        List<String> newNonTerminalVariables = new ArrayList<>(List.of(this.nonTerminalVariables));
+        List<Production> newProductions = new ArrayList<>();
+        // Map<oldNonTerminal, newNonTerminal>
+        Map<String, String> ProductionsMap = new HashMap<>();
+
+        // With what new non-terminal variable should we start
+        char newNonTerminalStart = 'M';
+
+        for (Production production : productions) {
+            // If the right side has more than 2 symbols
+            if(production.getRightSide().length() > 2 &&
+               production.getRightSide().matches("[A-Z][A-Z][A-Z]+")) {
+                String oldNonTerminal = production.getRightSide().substring(0, 2);
+
+                // If we already have a new non-terminal for this old non-terminal
+                if (ProductionsMap.containsKey(oldNonTerminal)) {
+                    newProductions.add(new Production(production.getLeftSide(),
+                            ProductionsMap.get(oldNonTerminal) + production.getRightSide().substring(2)));
+                    continue;
+                }
+
+                // If we don't have a new non-terminal for this old non-terminal
+                String newNonTerminal = String.valueOf(newNonTerminalStart);
+                ProductionsMap.put(oldNonTerminal, newNonTerminal);
+                newNonTerminalVariables.add(newNonTerminal);
+                newProductions.add(new Production(production.getLeftSide(),
+                        newNonTerminal + production.getRightSide().substring(2)));
+                newNonTerminalStart++;
+
+                continue;
+            }
+
+            // If the right side has 2 symbols and the first is a terminal and the second is a non-terminal
+            if (production.getRightSide().matches("[a-z][A-Z]")) {
+                String oldTerminal = production.getRightSide().substring(0, 1);
+
+                // If we already have a new non-terminal for this old terminal
+                if (ProductionsMap.containsKey(oldTerminal)) {
+                        newProductions.add(new Production(production.getLeftSide(),
+                                ProductionsMap.get(oldTerminal) + production.getRightSide().substring(1)));
+                        continue;
+                }
+
+                // If we don't have a new non-terminal for this old terminal
+                String newNonTerminal = String.valueOf(newNonTerminalStart);
+                ProductionsMap.put(oldTerminal, newNonTerminal);
+                newNonTerminalVariables.add(newNonTerminal);
+                newProductions.add(new Production(production.getLeftSide(),
+                        newNonTerminal + production.getRightSide().substring(1)));
+                newNonTerminalStart++;
+
+                continue;
+            }
+
+            newProductions.add(production);
+        }
+
+        // Add the new productions to the list of productions
+        for (Map.Entry<String, String> entry : ProductionsMap.entrySet()) {
+            String oldProduction = entry.getKey();
+            String newProduction = entry.getValue();
+            newProductions.add(new Production(newProduction, oldProduction));
+        }
+
+        // Update the list of productions in the Grammar object
+        this.productions = newProductions.toArray(new Production[0]);
+        this.nonTerminalVariables = newNonTerminalVariables.toArray(new String[0]);
+    }
+
 
 
     @Override
