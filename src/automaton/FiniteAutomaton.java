@@ -35,6 +35,23 @@ public class FiniteAutomaton {
     public String getInitialState() { return this.initialState; }
     public String[] getFinalStates() { return this.finalStates; }
 
+    public static FiniteAutomaton createBaseFiniteAutomaton() {
+        return new FiniteAutomaton(
+                new String[]{"q0", "q1", "q2", "q3", "q4"},
+                new String[]{"a", "b"},
+                new Transition[]{
+                        new Transition("q0", "a", "q1"),
+                        new Transition("q1", "b", "q1"),
+                        new Transition("q1", "b", "q2"),
+                        new Transition("q2", "b", "q3"),
+                        new Transition("q3", "a", "q1"),
+                        new Transition("q2", "a", "q4"),
+                },
+                "q0",
+                new String[]{"q4"}
+        );
+    }
+
     public boolean isWordValid(String str) {
         Set<String> currentStates = epsilonClosure(this.initialState);
 
