@@ -203,12 +203,36 @@ The initial grammar is shown including non-terminals, terminals, productions and
 * Vn (Non-terminal) = [A, B, S, C, M, N, O]
 * P (Productions) = [S -> MB, S -> AC, S -> a, S -> NC, S -> AS, S -> BC, S -> b, S -> OS, B -> b, B -> OS, C -> BA, A -> a, A -> NC, A -> AS, A -> BC, A -> b, A -> OS, M -> a, N -> AS, O -> b]
 
+## Unit Tests
+Unit tests are a type of automated testing that verifies the functionality of individual units or components of software applications. These tests are typically written by developers and are designed to identify defects or bugs in isolated sections of code. The purpose of unit testing is to ensure that each unit of the software application performs as expected and works correctly with other units of code.
+
+### GrammarTest
+The following unit tests were written for the Grammar class:
+* classifyGrammar()
+* convertToChomskyNormalForm()
+* testToString()
+* isContextSensitiveGrammar()
+* toFiniteAutomaton()
+* isContextFreeGrammar()
+* generateWord()
+* isRegularGrammar()
+
+### FiniteAutomatonTest
+The following unit tests were written for the FiniteAutomaton class:
+* testToString()
+* convertToRegularGrammar()
+* convertToDFA()
+* isDeterministic()
+* isWordValid()
+
 ## Conclusions 
 In conclusion, the laboratory work on Chomsky Normal Form has been a valuable learning experience for me. Through this work, I have achieved the following objectives:
 
 Firstly, I have learned about its importance. I have learned that CNF is a specific form in which context-free grammars can be represented, simplifying the analysis and manipulation of grammars in certain algorithms and aiding in parsing natural language.
 
 Secondly, I have become familiar with the different approaches for normalizing a context-free grammar to CNF. I have learned about the step-by-step process involved in converting a given grammar and the different techniques used at each stage.
+
+Thirdly, I have developed unit tests for the Grammar and FiniteAutomaton classes. I have learned how to write unit tests for different methods in a class and how to use the JUnit framework to run these tests.
 
 Finally, I have implemented a method for normalizing a given grammar to CNF and demonstrated how it works. Through this exercise, I have gained practical experience in developing a method for CNF normalization that can be applied to any context-free grammar.
 
