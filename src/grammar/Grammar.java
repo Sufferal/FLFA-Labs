@@ -19,6 +19,30 @@ public class Grammar {
         this.startingCharacter = startingCharacter;
     }
 
+    public String[] getNonTerminalVariables() { return this.nonTerminalVariables; }
+    public String[] getTerminalVariables() { return this.terminalVariables; }
+    public Production[] getProductions() { return this.productions; }
+    public String getStartingCharacter() { return this.startingCharacter; }
+
+    public static Grammar createBaseGrammar() {
+        return new Grammar(
+                new String[]{"S", "I", "J", "K"},
+                new String[]{"a", "b", "c", "e", "n", "f", "m"},
+                new Production[]{
+                        new Production("S", "cI"),
+                        new Production("I", "bJ"),
+                        new Production("I", "fI"),
+                        new Production("J", "nJ"),
+                        new Production("J", "cS"),
+                        new Production("I", "eK"),
+                        new Production("K", "nK"),
+                        new Production("I", "e"),
+                        new Production("K", "m")
+                },
+                "S"
+        );
+    }
+
     public String generateWord() {
         return generateWord(this.startingCharacter);
     }
@@ -61,26 +85,22 @@ public class Grammar {
 
     public FiniteAutomaton toFiniteAutomaton() {
         // Q - possible states
-        String[] possibleStates = Arrays.toString(this.nonTerminalVariables).split("");
-        String[] newPossibleStates = new String[possibleStates.length + 1];
-        System.arraycopy(possibleStates, 0, newPossibleStates, 0, possibleStates.length);
-        newPossibleStates[newPossibleStates.length - 1] = "X";
-        possibleStates = newPossibleStates;
+        String[] possibleStates = this.nonTerminalVariables;
 
         // Σ - Alphabet
         String[] alphabet = terminalVariables;
 
         // Δ - Transitions
-        Transition[] transitions = new Transition[this.productions.length];
+        Transition[] newTransitions = new Transition[this.productions.length];
         int i = 0;
         for (Production production : this.productions) {
-            char currentState = production.getLeftSide().charAt(0);
-            char nextState = production.getRightSide().length() > 1
-                    ? production.getRightSide().charAt(1)
-                    : 'X';
+            String currentState = String.valueOf(production.getLeftSide().charAt(0));
+            String nextState = production.getRightSide().length() == 2
+                    ? String.valueOf(production.getRightSide().charAt(1))
+                    : "X";
             String transitionLabel = String.valueOf(production.getRightSide().charAt(0));
 
-            transitions[i] = new Transition(Character.toString(currentState), transitionLabel, Character.toString(nextState));
+            newTransitions[i] = new Transition(currentState, transitionLabel, nextState);
             i++;
         }
 
@@ -90,7 +110,7 @@ public class Grammar {
         // F - Final State
         String[] finalStates = new String[]{"X"};
 
-        return new FiniteAutomaton(possibleStates, alphabet, transitions, initialState, finalStates);
+        return new FiniteAutomaton(possibleStates, alphabet, newTransitions, initialState, finalStates);
     }
 
 

@@ -29,6 +29,12 @@ public class FiniteAutomaton {
         this.finalStates = finalStates;
     }
 
+    public String[] getStates() { return this.states; }
+    public String[] getAlphabet() { return this.alphabet; }
+    public Transition[] getTransitions() { return this.transitions; }
+    public String getInitialState() { return this.initialState; }
+    public String[] getFinalStates() { return this.finalStates; }
+
     public boolean isWordValid(String str) {
         Set<String> currentStates = epsilonClosure(this.initialState);
 
