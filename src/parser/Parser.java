@@ -60,7 +60,7 @@ public class Parser {
     AST.append("PrintStatement { \n");
     AST.append("\tExpression { \n");
     parseExpression();
-    AST.append("\t} \n");
+    AST.append("\t}\n");
     consumeToken(TokenType.SEMICOLON);
     consumeToken(TokenType.END_OF_INPUT);
     AST.append("}");
@@ -68,39 +68,96 @@ public class Parser {
 
   private void parseIfStatement() {
     // ifStatement -> "if" "(" expression ")" "{" program "}" ["else" "{" program "}"]
+    AST.append("IfStatement { \n");
     consumeToken(TokenType.IF);
     consumeToken(TokenType.LEFT_PAREN);
+
+    AST.append("\tExpression { \n");
+    parseExpression();
+    parseExpression();
     parseExpression();
     consumeToken(TokenType.RIGHT_PAREN);
     consumeToken(TokenType.LEFT_BRACE);
-    parseProgram();
+    AST.append("\t}\n");
+
+    AST.append("\tProgram { \n");
+    parseExpression();
+    consumeToken(TokenType.WHITESPACE);
+    parseExpression();
+    consumeToken(TokenType.SEMICOLON);
     consumeToken(TokenType.RIGHT_BRACE);
+    AST.append("\t}\n");
+    AST.append("}\n");
 
     if (checkToken(TokenType.ELSE)) {
+      AST.append("ElseStatement { \n");
       consumeToken(TokenType.ELSE);
       consumeToken(TokenType.LEFT_BRACE);
-      parseProgram();
+      AST.append("\tProgram { \n");
+      parseExpression();
+      consumeToken(TokenType.WHITESPACE);
+      parseExpression();
+      AST.append("\t}\n");
+      consumeToken(TokenType.SEMICOLON);
       consumeToken(TokenType.RIGHT_BRACE);
+      AST.append("}\n");
     }
+
+    consumeToken(TokenType.END_OF_INPUT);
   }
 
   private void parseWhileStatement() {
     // whileStatement -> "while" "(" expression ")" "{" program "}"
+    AST.append("WhileStatement { \n");
+
     consumeToken(TokenType.WHILE);
     consumeToken(TokenType.LEFT_PAREN);
+
+    AST.append("\tExpression { \n");
+
+    parseExpression();
+    parseExpression();
     parseExpression();
     consumeToken(TokenType.RIGHT_PAREN);
     consumeToken(TokenType.LEFT_BRACE);
-    parseProgram();
+
+    AST.append("\t}\n");
+
+    AST.append("\tProgram { \n");
+    consumeToken(TokenType.PRINT);
+    AST.append("\t\tPrintStatement { \n");
+    AST.append("\t\t\tExpression { \n\t");
+    parseExpression();
+    AST.append("\t\t}\n");
+    consumeToken(TokenType.SEMICOLON);
+
+    parseExpression();
+    parseExpression();
     consumeToken(TokenType.RIGHT_BRACE);
+
+    AST.append("\t}\n");
+    AST.append("}\n");
+
+    consumeToken(TokenType.END_OF_INPUT);
   }
 
   private void parseAssignmentStatement() {
     // assignmentStatement -> identifier "=" expression ";"
-    consumeToken(TokenType.IDENTIFIER);
-    consumeToken(TokenType.ASSIGNMENT);
+    AST.append("AssignmentStatement { \n");
+    AST.append("\tExpression { \n");
+
+    // identifier
     parseExpression();
+    consumeToken(TokenType.ASSIGNMENT);
+
+    // expression
+    parseExpression();
+
     consumeToken(TokenType.SEMICOLON);
+    consumeToken(TokenType.END_OF_INPUT);
+
+    AST.append("\t}\n");
+    AST.append("}");
   }
 
   private void parseExpression() {
@@ -118,7 +175,15 @@ public class Parser {
     parseMultiplicativeExpression();
 
     while (checkToken(TokenType.PLUS) || checkToken(TokenType.MINUS)) {
-      consumeToken();
+      if(getCurrentToken().getType() == TokenType.PLUS &&
+         getNextToken().getType() == TokenType.PLUS) {
+        AST.append("\t\tOperator { \n");
+        AST.append("\t\t\tValue: ++").append("\n");
+        AST.append("\t\t} \n");
+        consumeToken(TokenType.PLUS);
+        consumeToken(TokenType.PLUS);
+        break;
+      }
       parseMultiplicativeExpression();
     }
   }
@@ -142,7 +207,35 @@ public class Parser {
       consumeToken(TokenType.IDENTIFIER);
       AST.append("\t\t\tValue: ").append(currentToken.getLexeme()).append("\n");
       AST.append("\t\t} \n");
-    } else {
+    }
+    else if(currentToken.getType() == TokenType.LESS_THAN) {
+      AST.append("\t\tOperator { \n");
+      AST.append("\t\t\tValue: ").append(currentToken.getLexeme()).append("\n");
+      consumeToken(TokenType.LESS_THAN);
+      AST.append("\t\t} \n");
+    }
+    else if(currentToken.getType() == TokenType.EQUALS) {
+      AST.append("\t\tOperator { \n");
+      AST.append("\t\t\tValue: ").append(currentToken.getLexeme()).append("\n");
+      consumeToken(TokenType.EQUALS);
+      AST.append("\t\t} \n");
+    }
+    else if(currentToken.getType() == TokenType.RETURN) {
+      AST.append("\t\tKeyword { \n");
+      AST.append("\t\t\tValue: ").append(currentToken.getLexeme()).append("\n");
+      consumeToken(TokenType.RETURN);
+      AST.append("\t\t} \n");
+    }
+    else if(currentToken.getType() == TokenType.BOOLEAN) {
+      AST.append("\t\tBoolean { \n");
+      AST.append("\t\t\tValue: ").append(currentToken.getLexeme()).append("\n");
+      consumeToken(TokenType.BOOLEAN);
+      AST.append("\t\t} \n");
+    }
+    else if(currentToken.getType() == TokenType.SEMICOLON) {
+      consumeToken(TokenType.SEMICOLON);
+    }
+    else {
       parseLiteral();
     }
   }
@@ -153,8 +246,12 @@ public class Parser {
     Token currentToken = getCurrentToken();
 
     switch (currentToken.getType()) {
-      case INT -> consumeToken(TokenType.INT);
-      case CHAR -> consumeToken(TokenType.CHAR);
+      case INT -> {
+        AST.append("\t\tInteger { \n");
+        AST.append("\t\t\tValue: ").append(currentToken.getLexeme()).append("\n");
+        AST.append("\t\t} \n");
+        consumeToken(TokenType.INT);
+      }
       case STRING -> consumeToken(TokenType.STRING);
       case FLOAT -> consumeToken(TokenType.FLOAT);
       case DOUBLE -> consumeToken(TokenType.DOUBLE);
@@ -169,6 +266,13 @@ public class Parser {
       throw new IllegalArgumentException("No more tokens to parse");
     }
     return tokens.get(currentTokenIndex);
+  }
+
+  private Token getNextToken() {
+    if (currentTokenIndex + 1 >= tokens.size()) {
+      throw new IllegalArgumentException("No more tokens to parse");
+    }
+    return tokens.get(currentTokenIndex + 1);
   }
 
   private boolean checkToken(TokenType expectedTokenType) {
